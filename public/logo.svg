@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00C853;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#008536;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="45" fill="#121212"/>
+  <circle cx="50" cy="50" r="40" fill="url(#grad)"/>
+  <!-- Boxing gloves shape -->
+  <ellipse cx="35" cy="50" rx="18" ry="22" fill="#fff"/>
+  <ellipse cx="65" cy="50" rx="18" ry="22" fill="#fff"/>
+  <circle cx="35" cy="50" r="8" fill="#00C853"/>
+  <circle cx="65" cy="50" r="8" fill="#00C853"/>
+  <path d="M35 38 L35 32 Q50 28 65 32 L65 38" stroke="#fff" stroke-width="3" fill="none"/>
+</svg>

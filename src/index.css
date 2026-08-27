@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #313131 transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #313131;
+    border-radius: 3px;
+  }
+
+  body {
+    @apply bg-dark-950 text-white font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-dark-950 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-dark-800 hover:bg-dark-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center gap-2 border border-dark-600;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center gap-2;
+  }
+
+  .card {
+    @apply bg-dark-900 border border-dark-700 rounded-xl p-5;
+  }
+
+  .input {
+    @apply w-full bg-dark-800 border border-dark-600 rounded-lg px-4 py-2.5 text-white placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-dark-300 mb-1.5;
+  }
+
+  .status-badge {
+    @apply px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-active {
+    @apply bg-primary-500/20 text-primary-400;
+  }
+
+  .status-inactive {
+    @apply bg-dark-700 text-dark-400;
+  }
+
+  .status-paid {
+    @apply bg-primary-500/20 text-primary-400;
+  }
+
+  .status-pending {
+    @apply bg-yellow-500/20 text-yellow-400;
+  }
+
+  .status-overdue {
+    @apply bg-red-500/20 text-red-400;
+  }
+}
+
+/* FullCalendar Custom Styles */
+.fc {
+  --fc-border-color: #313131;
+  --fc-button-bg-color: #1a1a1a;
+  --fc-button-border-color: #313131;
+  --fc-button-text-color: #fff;
+  --fc-button-hover-bg-color: #2a2a2a;
+  --fc-button-hover-border-color: #313131;
+  --fc-button-active-bg-color: #00C853;
+  --fc-button-active-border-color: #00C853;
+  --fc-today-bg-color: rgba(0, 200, 83, 0.1);
+  --fc-neutral-bg-color: #1a1a1a;
+  --fc-page-bg-color: #121212;
+  --fc-highlight-color: rgba(0, 200, 83, 0.2);
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.25rem !important;
+  font-weight: 600;
+  color: #fff;
+}
+
+.fc .fc-button {
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #00C853 !important;
+  border-color: #00C853 !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: #313131 !important;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border-color: #313131 !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background-color: rgba(0, 200, 83, 0.1) !important;
+}
+
+.fc-event {
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.fc-event-private {
+  background-color: #00C853 !important;
+  border-color: #00C853 !important;
+  color: #121212 !important;
+}
+
+.fc-event-group {
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #fff !important;
+}
+
+.fc-event-cancelled {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+  text-decoration: line-through;
+}
+
+.fc-daygrid-day-number {
+  color: #a4a4a4;
+  font-weight: 500;
+}
+
+.fc-col-header-cell-cushion {
+  color: #a4a4a4;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+/* Recharts Custom Styles */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #313131;
+}
+
+.recharts-text {
+  fill: #818181;
+}
+
+/* Animations */
+.animate-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
