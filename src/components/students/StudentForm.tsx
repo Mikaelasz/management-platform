@@ -10,7 +10,7 @@ interface StudentFormProps {
   onCancel: () => void;
 }
 
-const initialFormData = {
+const initialFormData: Omit<Student, 'id' | 'createdAt' | 'updatedAt'> = {
   name: '',
   birthDate: '',
   phone: '',
@@ -21,7 +21,7 @@ const initialFormData = {
   hasGraduation: false,
   graduationLevel: 'none',
   notes: '',
-  status: 'active' as const,
+  status: 'active',
 };
 
 function generateId(): string {
@@ -136,9 +136,12 @@ export default function StudentForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [expandedDays, setExpandedDays] = useState<string[]>([]);
   const [scheduleWarning, setScheduleWarning] = useState<string | null>(null);
+  const [withoutLesson, setWithoutLesson] = useState(false);
 
   useEffect(() => {
     if (student) {
+      const hasSchedule = Boolean((student.schedule || []).length);
+      setWithoutLesson(!hasSchedule);
       setFormData({
         name: student.name,
         birthDate: student.birthDate,
@@ -155,6 +158,7 @@ export default function StudentForm({
       const daysWithSchedules = [...new Set(student.schedule?.map(s => s.day) || [])];
       setExpandedDays(daysWithSchedules);
     } else {
+      setWithoutLesson(false);
       setFormData(initialFormData);
       setExpandedDays([]);
     }
@@ -165,24 +169,27 @@ export default function StudentForm({
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Nome é obrigatório';
-    if (formData.monthlyValue <= 0) newErrors.monthlyValue = 'Valor mensal deve ser maior que zero';
-    if (formData.dueDate < 1 || formData.dueDate > 31) newErrors.dueDate = 'Dia de vencimento inválido';
 
-    // Check for duplicate schedules within the form
-    const duplicateCheck = findDuplicateSchedules(formData.schedule);
-    if (duplicateCheck.duplicate) {
-      newErrors.schedule = duplicateCheck.message;
-    }
+    if (!withoutLesson) {
+      if (formData.monthlyValue <= 0) newErrors.monthlyValue = 'Valor mensal deve ser maior que zero';
+      if (formData.dueDate < 1 || formData.dueDate > 31) newErrors.dueDate = 'Dia de vencimento inválido';
 
-    // Check for conflicts with existing schedules
-    const conflictCheck = findConflicts(
-      formData.schedule,
-      existingStudents,
-      existingAcademies,
-      student?.id
-    );
-    if (conflictCheck.conflict) {
-      newErrors.schedule = conflictCheck.message;
+      // Check for duplicate schedules within the form
+      const duplicateCheck = findDuplicateSchedules(formData.schedule);
+      if (duplicateCheck.duplicate) {
+        newErrors.schedule = duplicateCheck.message;
+      }
+
+      // Check for conflicts with existing schedules
+      const conflictCheck = findConflicts(
+        formData.schedule,
+        existingStudents,
+        existingAcademies,
+        student?.id
+      );
+      if (conflictCheck.conflict) {
+        newErrors.schedule = conflictCheck.message;
+      }
     }
 
     setErrors(newErrors);
@@ -192,10 +199,19 @@ export default function StudentForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    onSubmit(formData);
+
+    const payload = withoutLesson
+      ? { ...formData, schedule: [], monthlyValue: 0, dueDate: 1 }
+      : formData;
+
+    onSubmit(payload);
   };
 
   const toggleDay = (day: string) => {
+    if (withoutLesson) {
+      setWithoutLesson(false);
+    }
+
     setExpandedDays(prev => {
       if (prev.includes(day)) {
         setFormData(p => ({
@@ -215,6 +231,10 @@ export default function StudentForm({
   };
 
   const addScheduleForDay = (day: string) => {
+    if (withoutLesson) {
+      setWithoutLesson(false);
+    }
+
     setFormData(prev => ({
       ...prev,
       schedule: [...prev.schedule, { day, startTime: '', endTime: '', id: generateId() }]
@@ -253,7 +273,7 @@ export default function StudentForm({
     setScheduleWarning(null);
   };
 
-  const getSchedulesForDay = (day: string): (ScheduleEntry & { index: number })[] => {
+  const getSchedulesForDay = (day: string): (ScheduleEntry & { id?: string; index: number })[] => {
     return formData.schedule
       .map((s, index) => ({ ...s, index }))
       .filter(s => s.day === day);
@@ -353,8 +373,35 @@ export default function StudentForm({
 
       {/* Schedule - Horários por Dia */}
       <div>
-        <label className="label mb-3">Horários por Dia da Semana</label>
-        <p className="text-xs text-dark-500 mb-3">Selecione os dias e adicione quantos horários forem necessários</p>
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <label className="label mb-1">Horários por Dia da Semana</label>
+            <p className="text-xs text-dark-500">Selecione os dias e adicione quantos horários forem necessários</p>
+          </div>
+          <label className="inline-flex items-center gap-2 rounded-lg border border-dark-600 bg-dark-800 px-3 py-2 text-xs text-dark-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={withoutLesson}
+              onChange={() => {
+                const nextValue = !withoutLesson;
+                setWithoutLesson(nextValue);
+                if (nextValue) {
+                  setFormData((p) => ({ ...p, schedule: [], monthlyValue: 0, dueDate: 1 }));
+                  setExpandedDays([]);
+                  setScheduleWarning(null);
+                }
+              }}
+              className="w-4 h-4 text-primary-500 accent-primary-500"
+            />
+            Sem aula vinculada
+          </label>
+        </div>
+
+        {withoutLesson && (
+          <div className="mb-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-sm text-amber-200">
+            Este aluno ficará cadastrado sem aula associada. Você pode vincular o horário depois, se necessário.
+          </div>
+        )}
 
         {scheduleWarning && (
           <div className="mb-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
@@ -365,7 +412,7 @@ export default function StudentForm({
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className={`space-y-3 ${withoutLesson ? 'pointer-events-none opacity-50' : ''}`}>
           {DAYS_OF_WEEK.map((day) => {
             const isExpanded = expandedDays.includes(day.value);
             const daySchedules = getSchedulesForDay(day.value);
@@ -546,14 +593,15 @@ export default function StudentForm({
       </div>
 
       {/* Financial */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${withoutLesson ? 'opacity-60' : ''}`}>
         <div>
-          <label className="label">Valor Mensal (€) *</label>
+          <label className="label">Valor Mensal (€) {withoutLesson ? '' : '*'}</label>
           <input
             type="number"
             value={formData.monthlyValue || ''}
+            disabled={withoutLesson}
             onChange={(e) => setFormData((p) => ({ ...p, monthlyValue: Number(e.target.value) }))}
-            className={`input ${errors.monthlyValue ? 'border-red-500' : ''}`}
+            className={`input ${errors.monthlyValue ? 'border-red-500' : ''} ${withoutLesson ? 'cursor-not-allowed opacity-60' : ''}`}
             placeholder="100"
             min="0"
             step="0.01"
@@ -561,12 +609,13 @@ export default function StudentForm({
           {errors.monthlyValue && <p className="text-red-500 text-xs mt-1">{errors.monthlyValue}</p>}
         </div>
         <div>
-          <label className="label">Dia de Vencimento *</label>
+          <label className="label">Dia de Vencimento {withoutLesson ? '' : '*'}</label>
           <input
             type="number"
             value={formData.dueDate || ''}
+            disabled={withoutLesson}
             onChange={(e) => setFormData((p) => ({ ...p, dueDate: Number(e.target.value) }))}
-            className={`input ${errors.dueDate ? 'border-red-500' : ''}`}
+            className={`input ${errors.dueDate ? 'border-red-500' : ''} ${withoutLesson ? 'cursor-not-allowed opacity-60' : ''}`}
             placeholder="5"
             min="1"
             max="31"
@@ -574,6 +623,9 @@ export default function StudentForm({
           {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate}</p>}
         </div>
       </div>
+      {withoutLesson && (
+        <p className="text-xs text-dark-500 -mt-2">Esses campos ficam disponíveis quando o aluno tem uma aula associada.</p>
+      )}
 
       <div>
         <label className="label">Status</label>
