@@ -149,7 +149,7 @@ export default function StudentsPage() {
               ? 'Tente ajustar os filtros de busca'
               : 'Comece adicionando seu primeiro aluno particular'
           }
-          action={!search && statusFilter === 'all' ? { label: 'Adicionar Aluno', onClick: handleAdd } : undefined}
+          action={undefined}
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -214,7 +214,7 @@ export default function StudentsPage() {
                     <MapPin className="w-4 h-4" />
                     <span>{student.location || 'Não informado'}</span>
                   </div>
-                  {Object.keys(groupedSchedules).length > 0 && (
+                  {Object.keys(groupedSchedules).length > 0 ? (
                     <div className="flex items-start gap-2 text-dark-400">
                       <Clock className="w-4 h-4 mt-0.5" />
                       <div className="flex flex-col gap-1">
@@ -229,6 +229,11 @@ export default function StudentsPage() {
                           </div>
                         ))}
                       </div>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-300">
+                      <Clock className="w-3.5 h-3.5" />
+                      Sem aula vinculada
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-primary-400 font-medium">
